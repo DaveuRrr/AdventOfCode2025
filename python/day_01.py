@@ -25,7 +25,7 @@ from typing import List
 # =============================================================================
 # Example Input
 # =============================================================================
-combination = """L68
+example = """L68
 L30
 R48
 L5
@@ -40,6 +40,7 @@ L82"""
 #
 # =============================================================================
 def get_password(combination:List) -> int:
+    """ Gets Password from Day 01 Part 01 """
     position:int = 50
     password:int = 0
     for ix, rotation in enumerate(combination):
@@ -50,46 +51,17 @@ def get_password(combination:List) -> int:
             position = position + clicks
 
         position = position % 100 # Modulo Operator...feels like cheating. :(
-        # print(position)
+        # print(f"{rotation} --> {position}")
         if position == 0: password += 1
 
     return password
 
+password = get_password(combination=example.split("\n"))
+print(f"Example Password: {password}") # TODO Must equal 3
 
-password = get_password(combination=combination.split("\n"))
-print(f"Password: {password}") #TODO 3
-
-# =============================================================================
-# First Attempt...
-# =============================================================================
-# with open("./puzzle_input/day_01.txt") as puzzle:
-#     for ix, rotation in enumerate(puzzle.readlines()):
-#         clicks = int(findall(r'\d+', rotation)[0])
-#         if clicks > 99: 
-#             print(clicks, "vs", clicks % 99)
-#             clicks = clicks % 99
-
-#         if "L" in rotation:
-#             position = position - clicks
-#             if position < 0: position = position + 99
-
-#         if "R" in rotation:
-#             position = position + clicks
-#             if position > 99: position = position - 99
-        
-#         if position < 0 or position > 99: raise
-#         if position == 0: 
-#             print(f"{position} Found!")
-#             password += 1
-#         else: print(position)
-
-# =============================================================================
-# Second Attempt
-# =============================================================================
 with open("./puzzle_input/day_01.txt") as puzzle:
     password = get_password(combination=puzzle.readlines())
-
-print(f"Password: {password}")
+    print(f"Password: {password}")
 
 # =============================================================================
 # Thoughts
@@ -103,3 +75,46 @@ print(f"Password: {password}")
 # Since we are doing rotations we are grabbing what is left from the dial,
 # with numbers only between 0 - 99 we would need to use 100 as the modulo since
 # there are 100 numbers we are dealing with.  
+
+# =============================================================================
+# Part 2
+# =============================================================================
+def get_any_clicks(combination:List) -> int:
+    """ Gets Any Clicks that point to 0 """
+    position:int = 50
+    password:int = 0
+    for ix, rotation in enumerate(combination):
+        clicks = int(findall(r'\d+', rotation)[0])
+        dial = position
+        if "L" in rotation:
+            position = position - clicks
+            # Any Clicks...
+            for x in range(clicks):
+                dial = dial - 1
+                if dial < 0: dial = 99
+                if dial == 0:
+                    # print("--> 0 Once!")
+                    password += 1
+
+        if "R" in rotation:
+            position = position + clicks
+            # Any Clicks...
+            for x in range(clicks):
+                dial = dial + 1
+                if dial > 99: dial = 0
+                if dial == 0: 
+                    # print("--> 0 Once!")
+                    password += 1
+            
+        # Updates to the absolute position
+        position = position % 100
+        # print(f"{rotation} --> {position}")
+    
+    return password
+
+password = get_any_clicks(combination=example.split("\n"))
+print(f"Any Clicks: {password}") # TODO Must equal 6
+
+with open("./puzzle_input/day_01.txt") as puzzle:
+    password = get_any_clicks(combination=puzzle.readlines())
+    print(f"Any Clicks: {password}")
